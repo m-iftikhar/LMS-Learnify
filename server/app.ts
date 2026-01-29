@@ -2,6 +2,7 @@ require("dotenv").config();
 import express,{ Request,Response,NextFunction } from 'express';
 export const app = express();
 import cookieParser from 'cookie-parser';
+import {ErrorMiddleware} from './middleware/error';
 import cors from 'cors';
 
 
@@ -25,7 +26,7 @@ app.get("/test", (req:Request, res:Response, next:NextFunction) => {
     });
 });
 
-
+app.use(ErrorMiddleware);
 
 
 
