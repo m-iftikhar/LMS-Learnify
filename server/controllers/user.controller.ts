@@ -12,7 +12,7 @@ import {
   refreshTokenOptions,
   sendToken,
 } from "../utils/jwt";
-
+import { redis } from "../utils/redis";
 
 interface IRegistrationBody {
   name: string;
@@ -172,6 +172,30 @@ export const loginUser = CatchAsyncError(
       }
       console.log("dhhdh", user);
       sendToken(user, 200, res);
+    } catch (error: any) {
+      return next(new ErrorHandler(error.message, 400));
+    }
+  }
+);
+
+// logout user
+// logout user
+export const logoutUser = CatchAsyncError(
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      res.cookie("access_token", "", { maxAge: 1 });
+      res.cookie("refresh_token", "", { maxAge: 1 });
+      
+      const userId = req.user?._id?.toString();
+      if (userId) {
+        await redis.del(userId); // ✅ EXACT SAME KEY
+      }
+      console.log("Deleting Redis key:", userId);
+
+      res.status(200).json({
+        success: true,
+        message: "Logged out successfully",
+      });
     } catch (error: any) {
       return next(new ErrorHandler(error.message, 400));
     }
