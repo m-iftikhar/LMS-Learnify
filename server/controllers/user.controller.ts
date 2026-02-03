@@ -1,5 +1,5 @@
-import { Request,Response,NextFunction } from "express";
-import userModel,{IUser} from "../models/user.model";
+import { Request, Response, NextFunction } from "express";
+import userModel, { IUser } from "../models/user.model";
 import path from "path";
 import ejs from "ejs";
 import jwt from "jsonwebtoken";
@@ -44,7 +44,7 @@ export const registrationUser = CatchAsyncError(
       const data = { user: { name: user.name }, activationCode };
       const html = await ejs.renderFile(
         path.join(__dirname, "../mails/activation-mail.ejs"),
-        data
+        data,
       );
 
       try {
@@ -66,7 +66,7 @@ export const registrationUser = CatchAsyncError(
     } catch (error: any) {
       return next(new ErrorHandler(error.message, 400));
     }
-  }
+  },
 );
 
 interface IActivationToken {
@@ -81,12 +81,12 @@ export const createActivationToken = (user: any): IActivationToken => {
     {
       user,
       activationCode,
-       time: Date.now(), // adds uniqueness
+      time: Date.now(), // adds uniqueness
     },
     process.env.ACTIVATION_SECRET as Secret,
     {
       expiresIn: "5m",
-    }
+    },
   );
 
   return { token, activationCode };
@@ -96,8 +96,6 @@ interface IActivationToken {
   token: string;
   activationCode: string;
 }
-
-
 
 // activate user
 interface IActivationRequest {
@@ -113,7 +111,7 @@ export const activateUser = CatchAsyncError(
 
       const newUser: { user: IUser; activationCode: string } = jwt.verify(
         activation_token,
-        process.env.ACTIVATION_SECRET as string
+        process.env.ACTIVATION_SECRET as string,
       ) as { user: IUser; activationCode: string };
 
       if (newUser.activationCode !== activation_code) {
@@ -139,9 +137,8 @@ export const activateUser = CatchAsyncError(
     } catch (error: any) {
       return next(new ErrorHandler(error.message, 400));
     }
-  }
+  },
 );
-
 
 // login user
 
@@ -175,22 +172,24 @@ export const loginUser = CatchAsyncError(
     } catch (error: any) {
       return next(new ErrorHandler(error.message, 400));
     }
-  }
+  },
 );
 
 // logout user
-// logout user
+
 export const logoutUser = CatchAsyncError(
   async (req: Request, res: Response, next: NextFunction) => {
     try {
       res.cookie("access_token", "", { maxAge: 1 });
       res.cookie("refresh_token", "", { maxAge: 1 });
-      
-      const userId = req.user?._id?.toString();
-      if (userId) {
-        await redis.del(userId); // ✅ EXACT SAME KEY
+
+      const userId = req.user?._id || "";
+
+      const redisId = String(userId);
+
+      if (redisId) {
+        await redis.del(redisId);
       }
-      console.log("Deleting Redis key:", userId);
 
       res.status(200).json({
         success: true,
@@ -199,5 +198,5 @@ export const logoutUser = CatchAsyncError(
     } catch (error: any) {
       return next(new ErrorHandler(error.message, 400));
     }
-  }
+  },
 );

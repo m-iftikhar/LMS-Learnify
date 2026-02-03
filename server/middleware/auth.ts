@@ -16,8 +16,8 @@ export const isAutheticated = CatchAsyncError(
       );
     }
 
-    const decoded = jwt.decode(access_token) as JwtPayload;
-
+    // const decoded = jwt.verify(access_token, process.env.JWT_SECRET as string) as JwtPayload;
+ const decoded = jwt.decode(access_token) as JwtPayload;
     if (!decoded) {
       return next(new ErrorHandler("access token is not valid", 400));
     }
