@@ -21,21 +21,26 @@ const refreshTokenExpire = parseInt(
   10
 );
 
+// In development (e.g. localhost HTTP), cookies must use secure: false so Postman/browser store them
+const isProduction = process.env.NODE_ENV === "production";
+const cookieSecure = isProduction;
+const cookieSameSite: "lax" | "strict" | "none" = isProduction ? "none" : "lax";
+
 // options for cookies
 export const accessTokenOptions: ITokenOptions = {
   expires: new Date(Date.now() + accessTokenExpire * 60 * 60 * 1000),
   maxAge: accessTokenExpire * 60 * 60 * 1000,
   httpOnly: true,
-  sameSite: "none",
-  secure: true,
+  sameSite: cookieSameSite,
+  secure: cookieSecure,
 };
 
 export const refreshTokenOptions: ITokenOptions = {
   expires: new Date(Date.now() + refreshTokenExpire * 24 * 60 * 60 * 1000),
   maxAge: refreshTokenExpire * 24 * 60 * 60 * 1000,
   httpOnly: true,
-  sameSite: "none",
-  secure: true,
+  sameSite: cookieSameSite,
+  secure: cookieSecure,
 };
 
 export const sendToken = (user: IUser, statusCode: number, res: Response) => {

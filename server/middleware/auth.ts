@@ -5,10 +5,21 @@ import jwt, { JwtPayload } from "jsonwebtoken";
 import { redis } from "../utils/redis";
 
 
+// Get access token from cookie (browser) or Authorization header (Postman / mobile)
+function getAccessToken(req: Request): string | undefined {
+  const fromCookie = req.cookies?.access_token as string | undefined;
+  if (fromCookie) return fromCookie;
+  const authHeader = req.headers.authorization;
+  if (authHeader && typeof authHeader === "string" && authHeader.startsWith("Bearer ")) {
+    return authHeader.slice(7);
+  }
+  return undefined;
+}
+
 // authenticated user
 export const isAutheticated = CatchAsyncError(
   async (req: Request, res: Response, next: NextFunction) => {
-    const access_token = req.cookies.access_token as string;
+    const access_token = getAccessToken(req);
 
     if (!access_token) {
       return next(
@@ -44,3 +55,17 @@ export const isAutheticated = CatchAsyncError(
     }
   
 );
+
+export const authorizeRoles = (...roles: string[]) => {
+  return (req: Request, res: Response, next: NextFunction) => {
+    if (!roles.includes(req.user?.role || "")) {
+      return next(
+        new ErrorHandler(
+          `Role: ${req.user?.role} is not allowed to access this resource`,
+          403
+        )
+      );
+    }
+    next();
+  };
+};
