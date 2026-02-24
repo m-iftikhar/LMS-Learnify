@@ -5,6 +5,7 @@ import cookieParser from 'cookie-parser';
 import {ErrorMiddleware} from './middleware/error';
 import cors from 'cors';
 import userRouter from './routes/user.route';
+import courseRouter from "./routes/course.route"
 
 app.use(cors({
     origin: process.env.ORIGIN,
@@ -17,8 +18,10 @@ app.use(cookieParser());
 
 app.use(
   "/api/v1",
-  userRouter
+  userRouter,
+  courseRouter
 );
+
 
 // test route
 app.get("/test", (req:Request, res:Response, next:NextFunction) => {
