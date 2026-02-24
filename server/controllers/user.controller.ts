@@ -15,6 +15,13 @@ import {
 import { redis } from "../utils/redis";
 import { JwtPayload } from "jsonwebtoken";
 import { getUserById } from "../services/user.service";
+import { v2 as cloudinary } from "cloudinary";
+
+cloudinary.config({
+  cloud_name: process.env.CLOUD_NAME,
+  api_key: process.env.CLOUD_API_KEY,
+  api_secret: process.env.CLOUD_API_SECRET,
+});
 
 interface IRegistrationBody {
   name: string;
@@ -386,6 +393,63 @@ export const updatePassword = CatchAsyncError(
       await redis.set(String(req.user?._id), JSON.stringify(user));
 
       res.status(201).json({
+        success: true,
+        user,
+      });
+    } catch (error: any) {
+      return next(new ErrorHandler(error.message, 400));
+    }
+  }
+);
+
+// update user avatar
+interface IUpdateProfilePicture {
+  avatar: string;
+}
+
+// update profile picture
+export const updateProfilePicture = CatchAsyncError(
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const { avatar } = req.body as IUpdateProfilePicture;
+
+      const userId = req.user?._id;
+
+      const user = await userModel.findById(userId).select("+password");
+
+      if (avatar && user) {
+        // if user have one avatar then call this if
+        if (user?.avatar?.public_id) {
+          // first delete the old image
+          await cloudinary.uploader.destroy(user?.avatar?.public_id);
+
+          const myCloud = await cloudinary.uploader.upload(avatar, {
+            folder: "avatars",
+            width: 150,
+          });
+          user.avatar = {
+            public_id: myCloud.public_id,
+            url: myCloud.secure_url,
+          };
+        } else {
+          const myCloud = await cloudinary.uploader.upload(avatar, {
+            folder: "avatars",
+            width: 150,
+          });
+          user.avatar = {
+            public_id: myCloud.public_id,
+            url: myCloud.secure_url,
+          };
+        }
+      }
+
+      await user?.save();
+
+      if (userId) {
+        await redis.set(String(userId), JSON.stringify(user));
+      }
+
+      res.status(200).json({
         success: true,
         user,
       });
