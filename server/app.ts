@@ -9,6 +9,7 @@ import courseRouter from "./routes/course.route";
 import orderRouter from "./routes/order.route";
 import notificationRoute from "./routes/notification.route";
 import analyticsRouter from "./routes/analytics.route";
+import layoutRouter from "./routes/layout.route";
 app.use(
   cors({
     origin: process.env.ORIGIN,
@@ -19,7 +20,7 @@ app.use(express.json({ limit: "50mb" }));
 
 app.use(cookieParser());
 
-app.use("/api/v1", userRouter, courseRouter, orderRouter, notificationRoute, analyticsRouter);
+app.use("/api/v1", userRouter, courseRouter, orderRouter, notificationRoute, analyticsRouter, layoutRouter);
 
 // test route
 app.get("/test", (req: Request, res: Response, next: NextFunction) => {
