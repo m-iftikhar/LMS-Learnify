@@ -1,21 +1,26 @@
+"use client";
+import Heading from "../utils/Heading";
+import Header from "./components/Header";
+import { useState } from "react";
 
+// interface Props {}
 
-export default function Home() {
+const Page = () => {
+    const [open, setOpen] = useState(false);
+  const [activeItem, setActiveItem] = useState(0);
   return (
     <div>
-      <main className="min-h-screen flex flex-col items-center justify-center gap-6">
-      <h1 className="text-4xl font-poppins min-[1000px]:text-blue-500">
-        Tailwind Test Page
-      </h1>
-
-      <p className="font-josefin text-xl">
-        If you can see styled text → Tailwind is working ✔
-      </p>
-
-      <button className="px-4 py-2 bg-black text-white dark:bg-white dark:text-black rounded">
-        Dark Mode Button
-      </button>
-    </main>
+      <Heading
+        title="Learnify"
+        description="Learnify is a platform for students to learn and get help from teachers"
+        keywords="Programming, MERN, Redux, Machine Learning"
+      />
+      <Header  open={open}
+        setOpen={setOpen}
+        activeItem={activeItem}
+        />
     </div>
   );
-}
+};
+
+export default Page;

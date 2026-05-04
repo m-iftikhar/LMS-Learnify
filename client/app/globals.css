@@ -1,5 +1,8 @@
 @import "tailwindcss";
 
+/* next-themes uses `class="dark"` on <html>; Tailwind v4 defaults to prefers-color-scheme */
+@custom-variant dark (&:where(.dark, .dark *));
+
 .font-poppins {
   font-family: var(--font-poppins), sans-serif;
 }
@@ -16,7 +19,5 @@
   background: conic-gradient(from 180deg at 50% 50%, var(--tw-gradient-stops));
 }
 
-.dark {
-  background: black;
-  color: white;
-}
+/* Theme colors: use Tailwind `dark:` on components. A global `.dark` rule here
+   was forcing black page background and fighting with next-themes + utilities. */
